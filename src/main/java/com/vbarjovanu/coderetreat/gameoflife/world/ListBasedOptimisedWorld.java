@@ -2,7 +2,6 @@ package com.vbarjovanu.coderetreat.gameoflife.world;
 
 import com.vbarjovanu.coderetreat.gameoflife.CellCoordinates;
 import com.vbarjovanu.coderetreat.gameoflife.state.CellStateFactory;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,20 +55,20 @@ public class ListBasedOptimisedWorld implements World {
     public void nextGeneration() {
         ListBasedOptimisedWorld nextGenWorld;
         CellCoordinates cell;
-        Pair<List<CellCoordinates>, List<CellCoordinates>> neighbours;
-        Pair<List<CellCoordinates>, List<CellCoordinates>> deadCellNeighbours;
+        NeighboursData neighbours;
+        NeighboursData deadCellNeighbours;
 
         nextGenWorld = new ListBasedOptimisedWorld();
         liveCells.sort(new CellCordinatesComparator());
         for (int index = 0; index < liveCells.size(); index++) {
             cell = this.liveCells.get(index);
             neighbours = getNeighbours(cell.getLine(), cell.getColumn(), index);
-            int count = neighbours.getKey().size();
-            nextGenWorld.setCellAlive(cell.getLine(), cell.getColumn(), CellStateFactory.getCellState(true).nextState(count).isAlive());
-            for (CellCoordinates deadCell : neighbours.getValue()) {
+            int liveNeighboursCount = neighbours.liveCells.size();
+            nextGenWorld.setCellAlive(cell.getLine(), cell.getColumn(), CellStateFactory.getCellState(true).nextState(liveNeighboursCount).isAlive());
+            for (CellCoordinates deadCell : neighbours.deadCells) {
                 deadCellNeighbours = getNeighbours(deadCell.getLine(), deadCell.getColumn(), index);
-                count = deadCellNeighbours.getKey().size();
-                nextGenWorld.setCellAlive(deadCell.getLine(), deadCell.getColumn(), CellStateFactory.getCellState(false).nextState(count).isAlive());
+                liveNeighboursCount = deadCellNeighbours.liveCells.size();
+                nextGenWorld.setCellAlive(deadCell.getLine(), deadCell.getColumn(), CellStateFactory.getCellState(false).nextState(liveNeighboursCount).isAlive());
             }
         }
         this.copyFrom(nextGenWorld);
@@ -81,7 +80,7 @@ public class ListBasedOptimisedWorld implements World {
         this.colsCount = world.colsCount;
     }
 
-    private Pair<List<CellCoordinates>, List<CellCoordinates>> getNeighbours(int line, int col, int index) {
+    private NeighboursData getNeighbours(int line, int col, int index) {
         List<CellCoordinates> liveCells = new ArrayList<>();
         List<CellCoordinates> deadCells = new ArrayList<>();
         int minLine = Math.max(0, line - 1);
@@ -119,7 +118,7 @@ public class ListBasedOptimisedWorld implements World {
             }
         }
 
-        return new Pair<>(liveCells, deadCells);
+        return new NeighboursData(deadCells, liveCells);
     }
 
     private boolean isNeighbour(int line, int col, int neighLine, int neighColumn) {
@@ -134,6 +133,16 @@ public class ListBasedOptimisedWorld implements World {
                 result = Integer.compare(o1.getColumn(), o2.getColumn());
             }
             return result;
+        }
+    }
+
+    private static class NeighboursData{
+        private final List<CellCoordinates> deadCells;
+        private final List<CellCoordinates> liveCells;
+
+        NeighboursData(List<CellCoordinates> deadCells, List<CellCoordinates> liveCells) {
+            this.deadCells = deadCells;
+            this.liveCells = liveCells;
         }
     }
 

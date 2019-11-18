@@ -12,7 +12,6 @@ repositories {
 }
 
 dependencies {
-    compile group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.0-M1'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.0-M1'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
